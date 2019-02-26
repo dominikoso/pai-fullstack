@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>PAI</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+  </head>
+  <body>
+    <div class="data" id="data"></div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script>
+      const apiUrl = "http://localhost:3000/localserver/";
+
+      const $list = $(".data");
+
+      function capitalizeFirstLetter(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+      }
+
+      function json2table(json, classes) {
+        var cols = Object.keys(json[0]);
+
+        var headerRow = "";
+        var bodyRows = "";
+
+        classes = classes || "";
+
+        function capitalizeFirstLetter(string) {
+          return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+
+        cols.map(function(col) {
+          headerRow += "<th>" + capitalizeFirstLetter(col) + "</th>";
+        });
+
+        json.map(function(row) {
+          bodyRows += "<tr>";
+
+          cols.map(function(colName) {
+            bodyRows += "<td><" + row[colName] + "</td>";
+          });
+          bodyRows += "<td>"
+
+          bodyRows += '<a href="#" onclick="removeData('+row["id"]+')"><i class="fas fa-user-minus"></i></a>'
+          //bodyRows += '<a href="#" onclick="getEditData('+row["id"]+')"><i class="fas fa-user-edit"></i></a>'
+
+          bodyRows += "</td>"
+          bodyRows += "</tr>";
+        });
+
+        return (
+          '<table class="' +
+          classes +
+          '"><thead><tr>' +
+          headerRow +
+          "</tr></thead><tbody>" +
+          bodyRows +
+          "</tbody></table>"
+        );
+      }
+
+      function readData() {
+        $.ajax({
+          url: apiUrl + "fetch.php",
+          dataType: "json"
+        }).done(ret => {
+          document.getElementById('data').innerHTML = json2table(ret, 'table');
+        });
+      }
+
+      function removeData(id) {
+          $.ajax({
+              url: apiUrl + "remove.php?id=" + id
+          }).done(ret => {
+              location.reload();
+          })
+      }
+
+      function setEditData(id) {
+
+      }
+
+      readData();
+    </script>
+  </body>
+</html>
