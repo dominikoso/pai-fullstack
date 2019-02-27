@@ -7,13 +7,16 @@ use App\SQLiteConnection;
  
 $pdo = (new SQLiteConnection())->connect();
 
-    if(!isset($_GET['id'])){
-        $stmt = $pdo->prepare("SELECT * FROM baza");
-    }else{
-        $stmt = $pdo->prepare("SELECT * FROM baza WHERE id = :id");
-        $stmt->bindParam(':id', $_GET['id'], PDO::PARAM_INT);
-    }
+    $adults = "Age>18";
+    $kids = "Age<18";
+    $none = "Age>0";
 
+    if(isset($_GET['id'])){
+        $stmt = $pdo->prepare('SELECT * FROM baza WHERE id = :id');
+        $stmt->bindParam(':id', $_GET['id'], PDO::PARAM_INT);
+    }else{
+        $stmt = $pdo->prepare("SELECT * FROM baza");
+    }
     $stmt->execute();
     $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
     

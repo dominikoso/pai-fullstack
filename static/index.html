@@ -9,7 +9,22 @@
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
   </head>
   <body>
+    <select id="sort" name="Sort by..." onchange="sortData()">
+      <option class="class-x" href="#" data-value="none" data-name="none" value="none">No sorting</option>
+      <option class="class-x" href="#" data-value="Name" data-name="Name" value="Name">Sort by Name</option>
+      <option class="class-x" href="#" data-value="Surname" data-name="Surname" value="Surname">Sort by Surname</option>
+      <option class="class-x" href="#" data-value="Age" data-name="Age" value="Age">Sort by Age</option>
+      <option class="class-x" href="#" data-value="Sex" data-name="Sex" value="Sex">Sort by Sex</option>
+    </select>
+    <select id="age" name="Age" onchange="sortData()">
+      <option class="class-x" href="#" data-value="none" data-name="none" value="none">All age</option>
+      <option class="class-x" href="#" data-value="Adults" data-name="Adults" value="Adults">Adults</option>
+      <option class="class-x" href="#" data-value="Kids" data-name="Kids" value="Kids">Kids</option>
+    </select><br>
     <div class="data" id="data"></div>
+
+    <button type="button" name="add" id="add" onclick="showAdd()" class="btn btn-primary" btn-lg btn-block>Add new Entity</button>
+    <a href="#" onclick="location.reload()"><i class="fa fa-recycle" aria-hidden="true"></i></a>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
@@ -39,18 +54,21 @@
           headerRow += "<th>" + capitalizeFirstLetter(col) + "</th>";
         });
 
+        headerRow += "<th>Remove</th>";
+        headerRow += "<th>Edit</th>";
+
         json.map(function(row) {
           bodyRows += "<tr>";
 
           cols.map(function(colName) {
-            bodyRows += "<td><" + row[colName] + "</td>";
+            bodyRows += "<td>" + row[colName] + "</td>";
           });
-          bodyRows += "<td>"
+          //bodyRows += "<td>"
 
-          bodyRows += '<a href="#" onclick="removeData('+row["id"]+')"><i class="fas fa-user-minus"></i></a>'
-          //bodyRows += '<a href="#" onclick="getEditData('+row["id"]+')"><i class="fas fa-user-edit"></i></a>'
+          bodyRows += '<td><a href="#" onclick="removeData('+row["id"]+')"><i class="fas fa-user-minus"></i></a></td>'
+          bodyRows += '<td><a href="#" onclick="editData('+row["id"]+')"><i class="fas fa-user-edit"></i></a></td>'
 
-          bodyRows += "</td>"
+          //bodyRows += "</td>"
           bodyRows += "</tr>";
         });
 
@@ -70,6 +88,7 @@
           url: apiUrl + "fetch.php",
           dataType: "json"
         }).done(ret => {
+          console.log(ret);
           document.getElementById('data').innerHTML = json2table(ret, 'table');
         });
       }
@@ -82,8 +101,41 @@
           })
       }
 
-      function setEditData(id) {
+      var sortByProperty = function (property) {
+        return function (x, y) {
+              return ((x[property] === y[property]) ? 0 : ((x[property] > y[property]) ? 1 : -1));
+        };
+      };
 
+      function sortData(){
+        $.ajax({
+          url: apiUrl + "fetch.php",
+          dataType: "json"
+        }).done(ret => {
+          var param = $('#sort').val();
+          var age = $('#age').val();
+          if (param != 'none'){
+          ret.sort(sortByProperty(param));
+          }
+          if (age != 'none'){
+              ret = ret.filter(function (a) {
+                if (age == 'Adults'){
+                  return a['Age'] >= 18;
+                }else{
+                  return a['Age'] < 18;
+                }  
+              })
+          }
+          document.getElementById('data').innerHTML = json2table(ret, 'table');
+        }) 
+      }
+
+      function showAdd(){
+          var win = window.open(apiUrl + 'add.php', 'Add Entity', "height=300,width=300");
+      }
+
+      function editData(id){
+          var win = window.open(apiUrl + 'edit.php?id=' + id, 'Edit Entity', "height=300, width=300");
       }
 
       readData();
