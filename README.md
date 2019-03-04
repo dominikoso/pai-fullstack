@@ -1,2 +1,2 @@
 # pai-fullstack
-SCI PAI task created using SQLite, PHP and JS
+School task for a PAI class created using SQLite, PHP and JS
